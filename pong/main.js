@@ -5,7 +5,8 @@
         this.playing = false;
         this.game_over = false;
         this.bars = [];
-        this.ball = null;        
+        this.ball = null;
+        this.winner_player=0;        
     }
 
     self.Board.prototype = {
@@ -13,7 +14,23 @@
             var elements = this.bars.map(function(bar){ return bar; });//generando una copia para poder elminar las copias basura
             elements.push(this.ball);
             return elements;
-        }
+        },
+        check_winner: function(){
+            if(this.game_over){
+                if(this.winner_player == 1){
+                    console.log("Ganó el jugador 1")
+                    document.getElementById("demo").innerHTML = "El ganador es el jugador 1";
+                }
+                if(this.winner_player == 2){
+                    console.log("Ganó el jugador 2")
+                    document.getElementById("demo").innerHTML = "El ganador es el jugador 2";
+                }
+            this.playing=false;
+            }
+        },
+        //print_winner: function(){
+          //  board_view.draw();
+        //}
     }
 })();
 
@@ -26,6 +43,7 @@
         this.speed_x = 3;
         this.board = board;
         this.direction = 1;
+        this.direction_y = 1; //prueba
         this.bounce_angle = 0;
         this.max_bounce_angle = Math.PI / 12;
         this.speed = 3;
@@ -37,7 +55,17 @@
     self.Ball.prototype = {
         move: function(){
             this.x +=(this.speed_x * this.direction);
-            this.y +=(this.speed_y);
+            this.y +=(this.speed_y * this.direction_y);
+        },
+        winner: function(){
+            if(this.x<=0){
+                board.game_over=true
+                board.winner_player=2;
+            }
+            if(this.x>=800){
+                board.game_over=true
+                board.winner_player=1;
+            }
         },
         get width(){
             return this.radius * 2;
@@ -47,15 +75,38 @@
         },
         collision: function(bar){ //reacciona a la colision con una barra que recibe como parámetro
             //calcula el ángulo en el que rebota la pelota y su dirección
-            var relative_intersect_y = ( bar.y + (bar.height / 2)) - this.y;
-            var normalized_intersect_y = relative_intersect_y / (bar.height / 2);
-
-            this.bounce_angle = normalized_intersect_y * this.max_bounce_angle;
-            this.speed_y = this.speed * -Math.sin(this.bounce_angle);
-            this.speed_x = this.speed * Math.cos(this.bounce_angle);
-
-            if(this.x > (this.board.width / 2)) this.direction = -1;
-            else this.direction = 1;
+            
+            if (this.y <= 0){
+                console.log(":P");
+                this.y = 0.001;
+                //this.direction_y = this.direction_y * -1; //prueba
+                this.direction = this.direction * -1;
+                this.speed_y = this.speed * Math.sin(this.bounce_angle);
+                this.speed_x = this.speed * -Math.cos(this.bounce_angle);
+                //console.log(this.direction);
+                //console.log(this.direction_y);
+            }
+            else if (this.y >= 400){
+                console.log(":P");
+                this.y = 399.999;
+                //this.direction_y = this.direction_y * -1; //prueba
+                this.direction = this.direction * -1;
+                this.speed_y = this.speed * Math.sin(this.bounce_angle);
+                this.speed_x = this.speed * -Math.cos(this.bounce_angle);
+                //console.log(this.direction);
+                //console.log(this.direction_y);
+            }
+            else{
+                console.log(":D");
+                var relative_intersect_y = ( bar.y + (bar.height / 2)) - this.y;
+                var normalized_intersect_y = relative_intersect_y / (bar.height / 2);
+    
+                this.bounce_angle = normalized_intersect_y * this.max_bounce_angle;
+                this.speed_y = this.speed * -Math.sin(this.bounce_angle);
+                this.speed_x = this.speed * Math.cos(this.bounce_angle);
+                if(this.x > (this.board.width / 2)) this.direction = -1;
+                else this.direction = 1;
+            }
         }
     }
 })();
@@ -118,11 +169,14 @@
                 this.draw();
                 this.check_collisions();
                 this.board.ball.move();
+                this.board.ball.winner();
+                this.board.check_winner();
             }
         }
     }
 
     function hit(a,b){ //revisa si a colisiona con b
+        //console.log(b.y);
         var hit = false;
         //colisiones horizontales
         if(b.x + b.width >= a.x && b.x < a.x + a.width){
@@ -138,6 +192,9 @@
         //colisión de b con a
         if(a.x <= b.x && a.x + a.width >= b.x + b.width){
             if(a.y <= b.y && a.y + a.height >= b.y + b.height)
+            hit = true;
+        }
+        if(b.y >= 400 || b.y <= 0){//prueba
             hit = true;
         }
         return hit;
@@ -190,6 +247,10 @@ document.addEventListener("keydown",function(ev){
         ev.preventDefault();
         board.playing = !board.playing;
     }
+    //else if(ev.keyCode === 71){
+      //  ev.preventDefault();
+    //    board.print_winner();
+  //  }
 });
 
 board_view.draw();
