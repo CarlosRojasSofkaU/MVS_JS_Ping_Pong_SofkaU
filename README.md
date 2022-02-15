@@ -37,8 +37,6 @@ La pelota puede tocar los bordes superiores, esto la hará rebotar según el án
 
 ## Requerimientos
 
-Para usar este proyecto solo es necesario contar con python 3.10 instalado en su computadora y tener algún tipo de interfaz para ejecutar comandos de terminal de su sistema operativo.
-
 Para usar este proyecto es necesario tener algún IDE que permita el manejo de Javascript y HTML5, además de contar con un servidor web local como lo puede ser Apache
 
 ## Preguntas
